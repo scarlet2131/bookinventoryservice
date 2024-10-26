@@ -2,14 +2,15 @@ package com.example.bookinventoryservice.controller;
 
 import com.example.bookinventoryservice.model.Book;
 import com.example.bookinventoryservice.service.BookService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/books")
@@ -24,10 +25,11 @@ public class BookController {
 
     // Endpoint to add a new book
     @PostMapping
-    public ResponseEntity<Book> addBook(@RequestBody Book book) {
+    public ResponseEntity<Book> addBook(@Valid @RequestBody Book book) {
         Book createdBook = bookService.addBook(book);
         return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
     }
+
 
     // Endpoint to retrieve a book by ID
     @GetMapping("/{id}")
@@ -106,5 +108,14 @@ public class BookController {
         }
     }
 
+    // Error handler for validation errors
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
 
 }
