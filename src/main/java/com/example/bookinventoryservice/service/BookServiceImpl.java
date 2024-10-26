@@ -46,4 +46,10 @@ public class BookServiceImpl implements BookService {
     public boolean deleteBook(UUID id) {
         return bookRepository.deleteBook(id) > 0;
     }
+
+    @Override
+    public List<Book> filterBooks(String title, String author, Integer genreId, String publicationDate) {
+        return bookRepository.filterBooks(title, author, genreId, publicationDate);
+    }
+
 }

@@ -73,4 +73,17 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    // Endpoint to filter books based on query parameters
+    @GetMapping("/filter")
+    public ResponseEntity<List<Book>> filterBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) String publicationDate) {
+
+        List<Book> books = bookService.filterBooks(title, author, genreId, publicationDate);
+        return ResponseEntity.ok(books);
+    }
+
 }

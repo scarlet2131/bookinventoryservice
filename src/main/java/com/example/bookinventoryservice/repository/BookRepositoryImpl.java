@@ -6,8 +6,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,4 +71,30 @@ public class BookRepositoryImpl implements BookRepository {
         String sql = "DELETE FROM inventory WHERE id = ?";
         return jdbcTemplate.update(sql, id.toString());
     }
+
+    @Override
+    public List<Book> filterBooks(String title, String author, Integer genreId, String publicationDate) {
+        String sql = "SELECT * FROM inventory WHERE 1=1";
+        List<Object> params = new ArrayList<>();
+
+        if (title != null) {
+            sql += " AND title LIKE ?";
+            params.add("%" + title + "%");
+        }
+        if (author != null) {
+            sql += " AND author LIKE ?";
+            params.add("%" + author + "%");
+        }
+        if (genreId != null) {
+            sql += " AND genre_id = ?";
+            params.add(genreId);
+        }
+        if (publicationDate != null) {
+            sql += " AND publication_date = ?";
+            params.add(Date.valueOf(publicationDate));
+        }
+
+        return jdbcTemplate.query(sql, params.toArray(), bookRowMapper);
+    }
+
 }

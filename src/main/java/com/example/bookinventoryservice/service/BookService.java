@@ -11,4 +11,6 @@ public interface BookService {
     List<Book> getAllBooks();
     Book updateBook(Book book);
     boolean deleteBook(UUID id);
+    List<Book> filterBooks(String title, String author, Integer genreId, String publicationDate);
+
 }

@@ -11,4 +11,6 @@ public interface BookRepository {
     List<Book> getAllBooks();
     int updateBook(Book book);
     int deleteBook(UUID id);
+    List<Book> filterBooks(String title, String author, Integer genreId, String publicationDate);
+
 }
