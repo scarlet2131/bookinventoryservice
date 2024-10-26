@@ -12,5 +12,7 @@ public interface BookService {
     Book updateBook(Book book);
     boolean deleteBook(UUID id);
     List<Book> filterBooks(String title, String author, Integer genreId, String publicationDate);
+    String exportBooksToCSV(List<Book> books);
+
 
 }

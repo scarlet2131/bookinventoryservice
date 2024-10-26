@@ -86,4 +86,25 @@ public class BookController {
         return ResponseEntity.ok(books);
     }
 
+    @GetMapping("/export")
+    public ResponseEntity<?> exportBooks(
+            @RequestParam(required = false) String format,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) String publicationDate) {
+
+        List<Book> books = bookService.filterBooks(title, author, genreId, publicationDate);
+
+        if ("csv".equalsIgnoreCase(format)) {
+            String csvContent = bookService.exportBooksToCSV(books);
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=books.csv")
+                    .body(csvContent);
+        } else {
+            return ResponseEntity.ok(books);
+        }
+    }
+
+
 }

@@ -51,5 +51,19 @@ public class BookServiceImpl implements BookService {
     public List<Book> filterBooks(String title, String author, Integer genreId, String publicationDate) {
         return bookRepository.filterBooks(title, author, genreId, publicationDate);
     }
+    @Override
+    public String exportBooksToCSV(List<Book> books) {
+        StringBuilder csv = new StringBuilder("ID,Title,Author,Genre,Publication Date,ISBN\n");
+        for (Book book : books) {
+            csv.append(book.getId()).append(',')
+                    .append(book.getTitle()).append(',')
+                    .append(book.getAuthor()).append(',')
+                    .append(book.getGenreId()).append(',')
+                    .append(book.getPublicationDate()).append(',')
+                    .append(book.getIsbn()).append('\n');
+        }
+        return csv.toString();
+    }
+
 
 }
