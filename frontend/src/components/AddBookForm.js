@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Alert, Modal } from 'react-bootstrap';
 
-const REACT_APP_API_URL = "http://localhost:8080/api"; // Base URL constant
+const REACT_APP_API_URL = "http://localhost:8080/api";
 
 const AddBookForm = ({ onBookAdded }) => {
     const [formData, setFormData] = useState({
@@ -11,7 +11,8 @@ const AddBookForm = ({ onBookAdded }) => {
     const [genres, setGenres] = useState([]); // State to store genres
     const [newGenre, setNewGenre] = useState(''); // State for the new genre input
     const [errors, setErrors] = useState({});
-    const [message, setMessage] = useState(null);
+    const [message, setMessage] = useState(null); // For main form messages
+    const [genreMessage, setGenreMessage] = useState(null); // For genre modal messages
     const [showGenreModal, setShowGenreModal] = useState(false); // State to control modal visibility
 
     // Fetch genres from the backend when the component loads
@@ -22,10 +23,8 @@ const AddBookForm = ({ onBookAdded }) => {
     const fetchGenres = async () => {
         try {
             const response = await axios.get(`${REACT_APP_API_URL}/genres`);
-            console.log("Fetched genres:", response.data);  // Debugging: log fetched genres
             setGenres(response.data);
         } catch (error) {
-            console.error("Failed to fetch genres:", error);
             alert("Failed to load genres. Please try again later.");
         }
     };
@@ -61,29 +60,39 @@ const AddBookForm = ({ onBookAdded }) => {
             setFormData({ title: '', author: '', genreId: '', publicationDate: '', isbn: '' });
             setErrors({});
         } catch (error) {
-            setMessage({ type: 'danger', text: 'Failed to add book. Please check input fields.' });
+            if (error.response && error.response.status === 500) {
+                setMessage({ type: 'danger', text: 'ISBN already exists. Please enter a unique ISBN.' });
+            } else {
+                setMessage({ type: 'danger', text: 'Failed to add book. Please check input fields.' });
+            }
         }
     };
 
-    const handleAddGenre = async () => {
+    const handleAddGenre = async (e) => {
+        e.preventDefault(); // Prevent default form submission behavior
+
+        if (!newGenre) { // Validate that the genre name is not empty
+            setGenreMessage({ type: 'danger', text: 'Genre name is required.' });
+            return;
+        }
+
         try {
             const response = await axios.post(`${REACT_APP_API_URL}/genres`, { name: newGenre });
-            console.log("Added new genre:", response.data);  // Debugging: log new genre
+            setGenreMessage({ type: 'success', text: 'Genre added successfully!' });
             setGenres([...genres, response.data]); // Add new genre to the dropdown
             setNewGenre(''); // Clear the input field
-            setShowGenreModal(false); // Close the modal
         } catch (error) {
-            console.error("Error adding genre:", error); // Debugging: log error
-            if (error.response && error.response.status === 400) {
-                alert("Genre with this name already exists.");
+            if (error.response && error.response.status === 500) { // Assuming 409 Conflict for duplicate genre
+                setGenreMessage({ type: 'danger', text: 'Genre with this name already exists.' });
             } else {
-                alert("Failed to add genre. Please try again.");
+                setGenreMessage({ type: 'danger', text: 'Failed to add genre. Please try again.' });
             }
         }
     };
 
     return (
         <>
+            {/* Main Book Form */}
             <Form onSubmit={handleSubmit}>
                 {message && <Alert variant={message.type}>{message.text}</Alert>}
 
@@ -134,7 +143,7 @@ const AddBookForm = ({ onBookAdded }) => {
                     <Form.Control.Feedback type="invalid">
                         {errors.genreId}
                     </Form.Control.Feedback>
-                    <div>
+                    <div class="right-align">
                         <Button variant="link" onClick={() => setShowGenreModal(true)} className="p-0 mt-2">
                             Add a new genre
                         </Button>
@@ -178,6 +187,7 @@ const AddBookForm = ({ onBookAdded }) => {
                     <Modal.Title>Add New Genre</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {genreMessage && <Alert variant={genreMessage.type}>{genreMessage.text}</Alert>}
                     <Form.Group>
                         <Form.Label>Genre Name</Form.Label>
                         <Form.Control

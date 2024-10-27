@@ -1,7 +1,8 @@
 package com.example.bookinventoryservice.controller;
 
-import com.example.bookinventoryservice.model.Book;
 import com.example.bookinventoryservice.model.Genre;
+import com.example.bookinventoryservice.service.BookService;
+import com.example.bookinventoryservice.service.GenreService;
 import com.example.bookinventoryservice.service.GenreServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,25 +15,35 @@ import java.util.List;
 @RequestMapping("/api/genres")
 public class GenreController {
 
+    private final GenreService genreService;
+
     @Autowired
-    private GenreServiceImpl genreService;
+    public GenreController(GenreService genreService) {
+        this.genreService = genreService;
+    }
 
     // Endpoint to get all genres
     @GetMapping
-    public List<Genre> getAllGenres() {
-        return genreService.getAllGenres();
+    public ResponseEntity<List<Genre>> getAllGenres() {
+        List<Genre> genres = genreService.getAllGenres();
+        return new ResponseEntity<>(genres, HttpStatus.OK);
     }
 
     // Endpoint to add a new genre
     @PostMapping
-    public  ResponseEntity<Genre> addGenre(@RequestBody Genre genre) {
+    public ResponseEntity<Genre> addGenre(@RequestBody Genre genre) {
         Genre result = genreService.addGenre(genre);
-        return new ResponseEntity<>(result, HttpStatus.CREATED);    }
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
+    }
 
     // Endpoint to delete a genre by ID
     @DeleteMapping("/{id}")
-    public String deleteGenre(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteGenre(@PathVariable Integer id) {
         int result = genreService.deleteGenre(id);
-        return result == 1 ? "Genre deleted successfully" : "Error deleting genre";
+        if (result == 1) {
+            return new ResponseEntity<>("Genre deleted successfully", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Error deleting genre", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

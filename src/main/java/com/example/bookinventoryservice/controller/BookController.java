@@ -1,10 +1,12 @@
 package com.example.bookinventoryservice.controller;
 
+import com.example.bookinventoryservice.dto.BookDTO;
 import com.example.bookinventoryservice.model.Book;
 import com.example.bookinventoryservice.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,13 +25,12 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    // Endpoint to add a new book
+//     Endpoint to add a new book
     @PostMapping
     public ResponseEntity<Book> addBook(@Valid @RequestBody Book book) {
         Book createdBook = bookService.addBook(book);
         return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
     }
-
 
     // Endpoint to retrieve a book by ID
     @GetMapping("/{id}")
@@ -41,8 +42,8 @@ public class BookController {
 
     // Endpoint to retrieve all books
     @GetMapping
-    public ResponseEntity<List<Book>> getAllBooks() {
-        List<Book> books = bookService.getAllBooks();
+    public ResponseEntity<List<BookDTO>> getAllBooks() {
+        List<BookDTO> books = bookService.getAllBooks();
         return ResponseEntity.ok(books);
     }
 
@@ -78,13 +79,13 @@ public class BookController {
 
     // Endpoint to filter books based on query parameters
     @GetMapping("/filter")
-    public ResponseEntity<List<Book>> filterBooks(
+    public ResponseEntity<List<BookDTO>> filterBooks(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) String publicationDate) {
 
-        List<Book> books = bookService.filterBooks(title, author, genreId, publicationDate);
+        List<BookDTO> books = bookService.filterBooks(title, author, genreId, publicationDate);
         return ResponseEntity.ok(books);
     }
 
@@ -96,17 +97,24 @@ public class BookController {
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) String publicationDate) {
 
-        List<Book> books = bookService.filterBooks(title, author, genreId, publicationDate);
+        List<BookDTO> books = bookService.filterBooks(title, author, genreId, publicationDate);
 
         if ("csv".equalsIgnoreCase(format)) {
             String csvContent = bookService.exportBooksToCSV(books);
             return ResponseEntity.ok()
                     .header("Content-Disposition", "attachment; filename=books.csv")
+                    .contentType(MediaType.TEXT_PLAIN)
                     .body(csvContent);
+        } else if ("json".equalsIgnoreCase(format)) {
+            // This will automatically convert the List<BookDTO> into a JSON array response
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(books);
         } else {
-            return ResponseEntity.ok(books);
+            return ResponseEntity.badRequest().body("Invalid format specified. Use 'csv' or 'json'.");
         }
     }
+
 
     // Error handler for validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)

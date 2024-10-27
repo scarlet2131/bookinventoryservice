@@ -1,5 +1,7 @@
+// BooksList.js
 import React from 'react';
-import { Table, Dropdown } from 'react-bootstrap';
+import { Table } from 'react-bootstrap';
+import ExportButton from './ExportButton';
 
 const BooksList = ({ books, onExport }) => (
     <div>
@@ -8,7 +10,7 @@ const BooksList = ({ books, onExport }) => (
             <tr>
                 <th>Title</th>
                 <th>Author</th>
-                <th>Genre ID</th>
+                <th>Genre</th>
                 <th>Publication Date</th>
                 <th>ISBN</th>
             </tr>
@@ -18,7 +20,7 @@ const BooksList = ({ books, onExport }) => (
                 <tr key={book.id}>
                     <td>{book.title}</td>
                     <td>{book.author}</td>
-                    <td>{book.genreId}</td>
+                    <td>{book.genreName}</td>
                     <td>{book.publicationDate}</td>
                     <td>{book.isbn}</td>
                 </tr>
@@ -26,15 +28,7 @@ const BooksList = ({ books, onExport }) => (
             </tbody>
         </Table>
         <div className="text-right mt-3">
-            <Dropdown>
-                <Dropdown.Toggle variant="success" id="dropdown-export">
-                    Export
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                    <Dropdown.Item onClick={() => onExport('csv')}>CSV</Dropdown.Item>
-                    <Dropdown.Item onClick={() => onExport('json')}>JSON</Dropdown.Item>
-                </Dropdown.Menu>
-            </Dropdown>
+            <ExportButton onExport={onExport} /> {/* Using ExportButton */}
         </div>
     </div>
 );

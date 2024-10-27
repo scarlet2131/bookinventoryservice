@@ -18,46 +18,71 @@ import java.util.List;
 @Repository
 public class GenreRepositoryImpl implements GenreRepository {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-    // Query to get all genres
+    @Autowired
+    public GenreRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    /**
+     * Retrieves all genres from the database.
+     * @return List of all Genre objects.
+     */
     public List<Genre> findAll() {
         String sql = "SELECT * FROM genres";
         return jdbcTemplate.query(sql, new GenreRowMapper());
     }
 
-    // Query to find genre by ID
+    /**
+     * Finds a genre by its unique ID.
+     * @param id ID of the genre to retrieve.
+     * @return Genre object matching the given ID.
+     */
     public Genre findById(Integer id) {
         String sql = "SELECT * FROM genres WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, new GenreRowMapper(), id);
     }
 
-    // Query to add a new genre
+    /**
+     * Adds a new genre to the database.
+     * @param genre Genre object to be saved.
+     * @return The saved Genre object with an auto-generated ID.
+     * @throws RuntimeException if a genre with the same name already exists.
+     */
     public Genre save(Genre genre) {
         try {
             String sql = "INSERT INTO genres (name) VALUES (?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
+
+            // Insert the genre name and retrieve the generated key (ID)
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, genre.getName());
                 return ps;
             }, keyHolder);
 
-            genre.setId(keyHolder.getKey().intValue());
+            genre.setId(keyHolder.getKey().intValue()); // Set the generated ID to the genre object
             return genre;
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("Genre already exists.", e);
         }
     }
 
-    // Query to delete a genre by ID
+    /**
+     * Deletes a genre by its ID.
+     * @param id ID of the genre to delete.
+     * @return Number of rows affected (1 if successful, 0 if genre not found).
+     */
     public int deleteById(Integer id) {
         String sql = "DELETE FROM genres WHERE id = ?";
         return jdbcTemplate.update(sql, id);
     }
 
-    // RowMapper for Genre
+    /**
+     * Maps rows of a ResultSet to Genre objects.
+     * Converts each row in the genres table into a Genre instance.
+     */
     private static class GenreRowMapper implements RowMapper<Genre> {
         @Override
         public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {
