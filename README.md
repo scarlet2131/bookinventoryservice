@@ -1,4 +1,4 @@
-![Homepage Screenshot](BookInventory.png)
+![Homepage Screenshot](bookinventoryservice.png)
 
 # Book Inventory Management System
 
