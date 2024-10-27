@@ -1,3 +1,5 @@
+![Homepage Screenshot](BookInventory.png)
+
 # Book Inventory Management System
 
 A web-based Book Inventory Management System built with **React**, **Spring Boot (with JDBC Template)**, and **MySQL**. This application allows users to manage a library of books, including functionality for searching, filtering, adding, exporting book data, and managing genres.
